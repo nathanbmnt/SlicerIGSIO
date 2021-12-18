@@ -103,10 +103,15 @@ bool qSlicerMetafileReader::load(const IOProperties& properties)
     qCritical() << "qSlicerMetafileReader::load did not receive fileName property";
   }
   QString fileName = properties["fileName"].toString();
+  QString browserName;
+  if (properties.contains("browserName"))
+  {
+      browserName = properties["browserName"].toString();
+  }
 
   vtkNew<vtkCollection> loadedSequenceNodes;
 
-  vtkMRMLSequenceBrowserNode* browserNode = d->MetafileImporterLogic->ReadSequenceFile(fileName.toStdString(), loadedSequenceNodes.GetPointer());
+  vtkMRMLSequenceBrowserNode* browserNode = d->MetafileImporterLogic->ReadSequenceFile(fileName.toStdString(), loadedSequenceNodes.GetPointer(), browserName.toStdString());
   if (browserNode == NULL)
   {
     return false;

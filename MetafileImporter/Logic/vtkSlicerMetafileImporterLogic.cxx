@@ -173,7 +173,7 @@ vtkMRMLSequenceNode* vtkSlicerMetafileImporterLogic::ReadSequenceMetafileImages(
   {
     imagesSequenceNode = vtkSmartPointer<vtkMRMLSequenceNode>::New();
   }
-  
+
   this->GetMRMLScene()->AddNode(imagesSequenceNode);
   imagesSequenceNode->SetIndexName("time");
   imagesSequenceNode->SetIndexUnit("s");
@@ -302,7 +302,8 @@ void vtkSlicerMetafileImporterLogic::WriteSequenceMetafileImages(const std::stri
 }
 
 //----------------------------------------------------------------------------
-vtkMRMLSequenceBrowserNode* vtkSlicerMetafileImporterLogic::ReadSequenceFile(const std::string& fileName, vtkCollection* addedSequenceNodes/*=NULL*/)
+vtkMRMLSequenceBrowserNode* vtkSlicerMetafileImporterLogic::ReadSequenceFile(const std::string& fileName, vtkCollection* addedSequenceNodes/*=NULL*/,
+const std::string& browserName/*=std::string()*/)
 {
   // Map the frame numbers to timestamps
   std::map< int, std::string > frameNumberToIndexValueMap;
@@ -383,6 +384,12 @@ vtkMRMLSequenceBrowserNode* vtkSlicerMetafileImporterLogic::ReadSequenceFile(con
 
   // For the user's convenience, add a browser node and show the volume in the slice viewer.
   // If a browser node by that exact name exists already then we reuse that to browse all the nodes together.
+  std::string browserNodeName = browserName;
+  if (browserNodeName.empty())
+  {
+      browserNodeName = shortestBaseNodeName;
+  }
+
   vtkSmartPointer<vtkMRMLSequenceBrowserNode> sequenceBrowserNode;
   vtkMRMLSequenceNode* createdImageNode = NULL;
   if (fileType == METAIMAGE_SEQUENCE_FILE)
@@ -394,7 +401,7 @@ vtkMRMLSequenceBrowserNode* vtkSlicerMetafileImporterLogic::ReadSequenceFile(con
       createdSequenceNodes.push_front(createdImageNode);
     }
     vtkSmartPointer<vtkCollection> foundSequenceBrowserNodes = vtkSmartPointer<vtkCollection>::Take(
-      this->GetMRMLScene()->GetNodesByClassByName("vtkMRMLSequenceBrowserNode", shortestBaseNodeName.c_str()));
+      this->GetMRMLScene()->GetNodesByClassByName("vtkMRMLSequenceBrowserNode", browserNodeName.c_str()));
     if (foundSequenceBrowserNodes->GetNumberOfItems() > 0)
     {
       sequenceBrowserNode = vtkMRMLSequenceBrowserNode::SafeDownCast(foundSequenceBrowserNodes->GetItemAsObject(0));
@@ -409,7 +416,7 @@ vtkMRMLSequenceBrowserNode* vtkSlicerMetafileImporterLogic::ReadSequenceFile(con
       {
         sequenceBrowserNode = vtkSmartPointer<vtkMRMLSequenceBrowserNode>::New();
       }
-      sequenceBrowserNode->SetName(this->GetMRMLScene()->GenerateUniqueName(shortestBaseNodeName).c_str());
+      sequenceBrowserNode->SetName(this->GetMRMLScene()->GenerateUniqueName(browserNodeName).c_str());
       this->GetMRMLScene()->AddNode(sequenceBrowserNode);
     }
   }
